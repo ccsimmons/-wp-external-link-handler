@@ -7,21 +7,37 @@
  * - Adds rel="nofollow noopener noreferrer"
  * - Appends a Font Awesome external link icon with a tooltip ("Opens External Link")
  * - Displays a confirmation dialog before navigating away from the site
+ * - Skips mailto:, tel:, and javascript: links
  * 
- * Last updated: 03.25.2025
+ * Created: 03.25.2025
+ * Last updated: 03.31.2025
  */
 
-// Function to create icon, tooltip, and notification for external links
+// Function to check if a URL is external
 function isExternalLink(url) {
-  const linkHost = new URL(url, window.location.href).host;
-  return linkHost !== window.location.host;
+  try {
+    const parsedUrl = new URL(url, window.location.href);
+    return (
+      parsedUrl.protocol.startsWith('http') &&
+      parsedUrl.host !== window.location.host
+    );
+  } catch (e) {
+    return false;
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   const links = document.querySelectorAll('a[href]');
 
   links.forEach(link => {
-    if (isExternalLink(link.href)) {
+    const href = link.getAttribute('href');
+
+    // Skip mailto:, tel:, and javascript: links
+    if (!href || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:')) {
+      return;
+    }
+
+    if (isExternalLink(href)) {
       // Add rel attributes
       link.setAttribute('rel', 'nofollow noopener noreferrer');
 
